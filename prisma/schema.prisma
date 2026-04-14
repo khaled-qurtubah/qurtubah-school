@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// المستخدمين
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      String   @default("teacher") // admin | deputy | teacher
+  image     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// الأقسام
+model Department {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  color     String
+  order     Int        @default(0)
+  programs  Program[]
+  employees Employee[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+// الموظفين
+model Employee {
+  id           String      @id @default(cuid())
+  name         String
+  position     String
+  progress     Int         @default(0)
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  programs     Program[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+// البرامج والأنشطة
+model Program {
+  id           String    @id @default(cuid())
+  name         String
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  employeeId   String?
+  employee     Employee?   @relation(fields: [employeeId], references: [id])
+  position     String?
+  status       String    @default("لم تبدأ")
+  priority     String    @default("متوسطة")
+  progress     Int       @default(0)
+  startDate    String?
+  endDate      String?
+  notes        String?
+  year         Int       @default(2025)
+  month        Int       @default(1)
+  isFavorite   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// الإعدادات
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// الأهداف الشهرية
+model Goal {
+  id        String   @id @default(cuid())
+  title     String
+  target    Int      @default(100)
+  achieved  Int      @default(0)
+  category  String   @default("general")
+  year      Int      @default(2025)
+  month     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
